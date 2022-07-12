@@ -39,13 +39,22 @@ for dia in $(seq -f "%02g" $diaIni $diaFim); do
 
 done
 
+# Pega o cabeçalho do primeiro csv e escreve no csv final temporário
+primeiroCsv=$(ls -d $tmpDir/* | tail -n +1 | head -1)
+head -1 $primeiroCsv > $tmpDir/$csvFinal
+
+# Adiciona o conteúdo de todos os csvs no csv final temporário
+tail -q -n +2  $tmpDir/*.csv >> $tmpDir/$csvFinal
+
 # Dados são copiados do diretório temporário para o diretório dados
+# Se tipoInfo = 1 remove a coluna de óbitos por COVID-19
+# Se tipoInfo = 2 remove a coluna de casos de COVID-19
 if [ $tipoInfo -eq 1 ]; then
-    cat $tmpDir/*.csv | cut -d';' -f6 --complement > $dataDir/$csvFinal
+    cat $tmpDir/$csvFinal | cut -d';' -f6 --complement > $dataDir/$csvFinal
 elif [ $tipoInfo -eq 2 ]; then
-    cat $tmpDir/*.csv | cut -d';' -f5 --complement > $dataDir/$csvFinal
+    cat $tmpDir/$csvFinal | cut -d';' -f5 --complement > $dataDir/$csvFinal
 else
-    cat $tmpDir/*.csv > $dataDir/$csvFinal
+    cat $tmpDir/$csvFinal > $dataDir/$csvFinal
 fi
 
 # Diretório temporário é apagado
